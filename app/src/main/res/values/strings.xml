@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">Sms Receiver</string>
-    <string name="snackbar_permission_text">SMS permissions are required to work</string>
+    <string name="snack_bar_permission_text">SMS permissions are required to work</string>
     <string name="tf_from_hint">From</string>
     <string name="tf_to_hint">To</string>
-    <string name="btn_save_text">Kaydet</string>
+    <string name="btn_save_text">Save</string>
     <string name="iv_background_content_desc">Shows background image</string>
     <string name="tf_pattern_hint">Pattern</string>
+    <string name="saved_from_key">from</string>
+    <string name="saved_to_key">to</string>
+    <string name="saved_pattern_key">pattern</string>
+    <string name="error_text_empty">This area cannot be empty</string>
 </resources>

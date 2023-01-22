@@ -1,13 +1,29 @@
 <resources>
     <string name="app_name">Sms Receiver</string>
-    <string name="snack_bar_permission_text">SMS permissions are required to work</string>
+
+    <!-- UI related data -->
+    <eat-comment />
     <string name="tf_from_hint">From</string>
     <string name="tf_to_hint">To</string>
-    <string name="btn_save_text">Save</string>
-    <string name="iv_background_content_desc">Shows background image</string>
     <string name="tf_pattern_hint">Pattern</string>
-    <string name="saved_from_key">from</string>
-    <string name="saved_to_key">to</string>
-    <string name="saved_pattern_key">pattern</string>
+    <string name="btn_save_text">Save</string>
+
+    <!-- Shared preferences keys -->
+    <eat-comment />
+    <string name="saved_enabled_key">is_app_enabled</string>
+    <string name="saved_sender_key">sender_phone</string>
+    <string name="saved_receiver_key">receiver_phone</string>
+    <string name="saved_pattern_key">message_pattern</string>
+    <string name="preferences_file_key">com.example.smsreceiver.DataPrefs</string>
+
+    <!-- Error messages -->
+    <eat-comment />
     <string name="error_text_empty">This area cannot be empty</string>
+    <string name="error_sms_perms_not_granted">SMS permissions are required to work</string>
+
+    <!-- Auto message -->
+    <eat-comment />
+    <string name="auto_msg_text">
+        Hello, it\'s an automated message. Please don\'t reply to this message.\n
+        I found these that fit the pattern: </string>
 </resources>

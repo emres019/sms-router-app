@@ -6,14 +6,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
@@ -35,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
                 public void onActivityResult(Map<String, Boolean> areGranted) {
                     if (Boolean.FALSE.equals(areGranted.get(Manifest.permission.RECEIVE_SMS)) ||
                             Boolean.FALSE.equals(areGranted.get(Manifest.permission.SEND_SMS))) {
+                        // TODO: Change snack bar with something else
                         Snackbar.make(findViewById(android.R.id.content),
-                                getString(R.string.snack_bar_permission_text),
+                                getString(R.string.error_sms_perms_not_granted),
                                 Snackbar.LENGTH_INDEFINITE)
                                 .setAction(android.R.string.ok, v -> mSmsPermissionLauncher.launch(new String[] {
                                         Manifest.permission.RECEIVE_SMS,
@@ -57,21 +58,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate menu
         getMenuInflater().inflate(R.menu.menu_app_bar, menu);
+
+        // Set switch state
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
+        final SwitchCompat sw = menu.findItem(R.id.app_bar_switch).getActionView().findViewById(R.id.sw_inner);
+        sw.setChecked(prefs.getBoolean(getString(R.string.saved_enabled_key), false));
+
+        // Set switch listener
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                // Update shared preferences
+                prefs.edit()
+                        .putBoolean(getString(R.string.saved_enabled_key), isChecked)
+                        .apply();
+            }
+        });
+
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.app_bar_switch) {
-            // TODO: Handle switch click action
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -100,6 +108,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_save).setOnClickListener(this::btnSaveOnClick);
     }
 
+    /***
+     * Saves sender, receiver and pattern to shared preferences.
+     * @param btn Save button
+     */
     private void btnSaveOnClick(View btn) {
         String from = mTfFrom.getEditText().getText().toString().trim();
         String to = mTfTo.getEditText().getText().toString().trim();
@@ -121,13 +133,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Save data to shared preferences
-        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        editor.putString(getString(R.string.saved_from_key), from);
-        editor.putString(getString(R.string.saved_to_key), to);
-        editor.putString(getString(R.string.saved_pattern_key), pattern);
-
-        editor.apply();
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
+        prefs.edit()
+                .putString(getString(R.string.saved_sender_key), from)
+                .putString(getString(R.string.saved_receiver_key), to)
+                .putString(getString(R.string.saved_pattern_key), pattern)
+                .apply();
     }
 }

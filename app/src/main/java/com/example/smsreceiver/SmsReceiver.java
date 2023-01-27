@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Telephony;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -36,37 +37,44 @@ public class SmsReceiver extends BroadcastReceiver {
             byte[][] pdus = (byte[][]) bundle.get("pdus");
             if (pdus != null) {
                 // Log sms receive
-                Log.i(LOG_TAG, "Got " + pdus.length + " SMS");
+                Log.i(LOG_TAG, "onReceive: Got " + pdus.length + " SMS");
 
                 // Get shared preferences data
                 String sender = prefs.getString(context.getString(R.string.saved_sender_key), null);
                 if (sender == null) {
-                    Log.e(LOG_TAG, "Sender is null");
+                    Log.e(LOG_TAG, "onReceive: Sender is null");
                     return;
                 }
 
                 String receiver = prefs.getString(context.getString(R.string.saved_receiver_key), null);
                 if (receiver == null) {
-                    Log.e(LOG_TAG, "Receiver is null");
+                    Log.e(LOG_TAG, "onReceive: Receiver is null");
                     return;
                 }
 
                 String messagePattern = prefs.getString(context.getString(R.string.saved_pattern_key), null);
                 if (messagePattern == null) {
-                    Log.e(LOG_TAG, "Pattern is null");
+                    Log.e(LOG_TAG, "onReceive: Pattern is null");
                     return;
                 }
 
-                for (byte[] bytes : pdus) {
+                for (byte[] bytes: pdus) {
                     SmsMessage message = SmsMessage.createFromPdu(bytes, format);
-                    if (message.getOriginatingAddress().equals(sender) &&
-                            context.checkSelfPermission(android.Manifest.permission.SEND_SMS)
-                                    == PackageManager.PERMISSION_GRANTED) {
 
+                    String strippedSender = PhoneNumberUtils.stripSeparators(sender);
+                    String strippedMessageAddress = PhoneNumberUtils.stripSeparators(message.getOriginatingAddress());
+                    boolean isMessageFromSender = (PhoneNumberUtils.isGlobalPhoneNumber(strippedMessageAddress)
+                            ? strippedMessageAddress : message.getOriginatingAddress()).equals(
+                            PhoneNumberUtils.isGlobalPhoneNumber(strippedSender) ? strippedSender : sender
+                    );
+                    if (isMessageFromSender && context.checkSelfPermission(android.Manifest.permission.SEND_SMS)
+                            == PackageManager.PERMISSION_GRANTED) {
                         // Send SMS
                         List<String> matches = getMatches(message.getMessageBody(), messagePattern);
-                        sendSms(context.getString(R.string.auto_msg_text)
-                                + String.join(", ", matches), receiver);
+                        if (!matches.isEmpty()) {
+                            sendSms(context.getString(R.string.auto_msg_text)
+                                    + String.join(", ", matches), receiver);
+                        }
                     }
                 }
             }
@@ -95,7 +103,7 @@ public class SmsReceiver extends BroadcastReceiver {
         Pattern pattern = Pattern.compile(messagePattern, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(message);
 
-        LinkedList<String> matches = new LinkedList<>();
+        List<String> matches = new LinkedList<>();
         while (matcher.find()) {
             matches.add(matcher.group());
         }

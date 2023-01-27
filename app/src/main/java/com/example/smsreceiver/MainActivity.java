@@ -2,9 +2,11 @@ package com.example.smsreceiver;
 
 import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -48,13 +50,61 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+    private final ActivityResultLauncher<String> mContactPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            new ActivityResultCallback<Boolean>() {
+                @Override
+                public void onActivityResult(Boolean isGranted) {
+                    if (!isGranted) {
+                        if (mTfFrom.hasFocus()) {
+                            mTfFrom.setError(getString(R.string.error_contact_perm_not_granted));
+                        }
+                        else if (mTfTo.hasFocus()) {
+                            mTfTo.setError(getString(R.string.error_contact_perm_not_granted));
+                        }
+                    }
+                }
+            });
+
     private final ActivityResultLauncher<Void> mContactPickerLauncher = registerForActivityResult(
             new ActivityResultContracts.PickContact(),
             new ActivityResultCallback<Uri>() {
                 @Override
                 public void onActivityResult(Uri result) {
-                    // TODO: Handle the result uri and remove the log
-                    Log.d(LOG_TAG, "onContactPickerLauncher: " + (result == null ? "null" : result));
+                    if (result != null) {
+                        boolean hasPhoneNumber = false;
+                        long id = -1;
+
+                        try (Cursor cursor = getContentResolver().query(result, new String[] {
+                                ContactsContract.Contacts.HAS_PHONE_NUMBER,
+                                ContactsContract.Contacts._ID
+                        }, null, null, null)) {
+                            if (cursor != null && cursor.moveToFirst()) {
+                                hasPhoneNumber = cursor.getInt(0) == 1;
+                                id = cursor.getLong(1);
+                            }
+                        }
+
+                        if (hasPhoneNumber) {
+                            try (Cursor phoneCursor = getContentResolver().query(
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                    new String[] {
+                                            ContactsContract.CommonDataKinds.Phone.NUMBER
+                                    },
+                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?",
+                                    new String[] { String.valueOf(id) },
+                                    null)) {
+                                if (phoneCursor != null && phoneCursor.moveToFirst()) {
+                                    String number = phoneCursor.getString(0);
+                                    if (mTfFrom.hasFocus()) {
+                                        mTfFrom.getEditText().setText(number);
+                                    } else if (mTfTo.hasFocus()) {
+                                        mTfTo.getEditText().setText(number);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             });
 
@@ -99,10 +149,24 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Show contact picker when start icons are clicked
-        this.<TextInputLayout>findViewById(R.id.tf_from)
-                .setStartIconOnClickListener(v -> mContactPickerLauncher.launch(null));
-        this.<TextInputLayout>findViewById(R.id.tf_to)
-                .setStartIconOnClickListener(v -> mContactPickerLauncher.launch(null));
+        this.<TextInputLayout>findViewById(R.id.tf_from).setStartIconOnClickListener(v -> {
+                    if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        mContactPickerLauncher.launch(null);
+                    }
+                    else {
+                        mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+                    }
+                });
+        this.<TextInputLayout>findViewById(R.id.tf_to).setStartIconOnClickListener(v -> {
+                    if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        mContactPickerLauncher.launch(null);
+                    }
+                    else {
+                        mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+                    }
+                });
 
         // Save sender, receiver and message when save button is clicked
         findViewById(R.id.btn_save).setOnClickListener(this::btnSaveOnClick);

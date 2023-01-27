@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sms Receiver</string>
+    <string name="app_name" translatable="false">Sms Receiver</string>
 
     <!-- UI related data -->
     <eat-comment />
@@ -10,16 +10,17 @@
 
     <!-- Shared preferences keys -->
     <eat-comment />
-    <string name="saved_enabled_key">is_app_enabled</string>
-    <string name="saved_sender_key">sender_phone</string>
-    <string name="saved_receiver_key">receiver_phone</string>
-    <string name="saved_pattern_key">message_pattern</string>
-    <string name="preferences_file_key">com.example.smsreceiver.DataPrefs</string>
+    <string name="saved_enabled_key" translatable="false">is_app_enabled</string>
+    <string name="saved_sender_key" translatable="false">sender_phone</string>
+    <string name="saved_receiver_key" translatable="false">receiver_phone</string>
+    <string name="saved_pattern_key" translatable="false">message_pattern</string>
+    <string name="preferences_file_key" translatable="false">com.example.smsreceiver.DataPrefs</string>
 
     <!-- Error messages -->
     <eat-comment />
     <string name="error_text_empty">This area cannot be empty</string>
     <string name="error_sms_perms_not_granted">SMS permissions are required to work</string>
+    <string name="error_contact_perm_not_granted">The permission is necessary for getting contact info</string>
 
     <!-- Auto message -->
     <eat-comment />

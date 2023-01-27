@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- UI related data -->
+    <eat-comment />
+    <string name="tf_from_hint">Gönderici</string>
+    <string name="tf_to_hint">Alıcı</string>
+    <string name="tf_pattern_hint">Model</string>
+    <string name="btn_save_text">Kaydet</string>
+
+    <!-- Error messages -->
+    <eat-comment />
+    <string name="error_text_empty">Bu alan boş bırakılamaz</string>
+    <string name="error_sms_perms_not_granted">SMS izinleri çalışmak için gerekli</string>
+    <string name="error_contact_perm_not_granted">Bu izin kişinin numarasını çekmek için gerekli</string>
+
+    <!-- Auto message -->
+    <eat-comment />
+    <string name="auto_msg_text">
+        Merhaba, bu bir otomatik mesajdır. Lütfen cevaplamayınız.\n
+        Belirtilen modele uygun şu ifadeleri buldum: </string>
+</resources>

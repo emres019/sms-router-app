@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -150,23 +151,31 @@ public class MainActivity extends AppCompatActivity {
 
         // Show contact picker when start icons are clicked
         this.<TextInputLayout>findViewById(R.id.tf_from).setStartIconOnClickListener(v -> {
-                    if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        mContactPickerLauncher.launch(null);
-                    }
-                    else {
-                        mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
-                    }
-                });
+            mTfFrom.requestFocus();
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(mTfFrom.getWindowToken(),
+                    InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+            if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                mContactPickerLauncher.launch(null);
+            }
+            else {
+                mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+            }
+        });
         this.<TextInputLayout>findViewById(R.id.tf_to).setStartIconOnClickListener(v -> {
-                    if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        mContactPickerLauncher.launch(null);
-                    }
-                    else {
-                        mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
-                    }
-                });
+            mTfTo.requestFocus();
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(mTfTo.getWindowToken(),
+                    InputMethodManager.HIDE_IMPLICIT_ONLY);
+
+            if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                mContactPickerLauncher.launch(null);
+            }
+            else {
+                mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+            }
+        });
 
         // Save sender, receiver and message when save button is clicked
         findViewById(R.id.btn_save).setOnClickListener(this::btnSaveOnClick);

@@ -1,4 +1,4 @@
-package com.example.smsreceiver;
+package com.example.smsrouter;
 
 import org.junit.Test;
 

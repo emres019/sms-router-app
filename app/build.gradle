@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.smsreceiver'
+    namespace 'com.example.smsrouter'
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.example.smsreceiver"
+        applicationId "com.example.smsrouter"
         minSdk 27
         targetSdk 32
         versionCode 1

@@ -1,4 +1,4 @@
-package com.example.smsreceiver;
+package com.example.smsrouter;
 
 import android.content.Context;
 

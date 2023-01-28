@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Sms Receiver</string>
+    <string name="app_name">SMS Router</string>
 
     <!-- UI related data -->
     <eat-comment />

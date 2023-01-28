@@ -1,4 +1,4 @@
-package com.example.smsreceiver;
+package com.example.smsrouter;
 
 import android.Manifest;
 import android.content.SharedPreferences;
@@ -6,15 +6,16 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
@@ -120,17 +121,23 @@ public class MainActivity extends AppCompatActivity {
         sw.setChecked(prefs.getBoolean(getString(R.string.saved_enabled_key), false));
 
         // Set switch listener
-        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                // Update shared preferences
-                prefs.edit()
-                        .putBoolean(getString(R.string.saved_enabled_key), isChecked)
-                        .apply();
-            }
+        sw.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            // Update shared preferences
+            prefs.edit()
+                    .putBoolean(getString(R.string.saved_enabled_key), isChecked)
+                    .apply();
         });
 
         return true;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
+        outState.putString(getString(R.string.saved_sender_key), mTfFrom.getEditText().getText().toString());
+        outState.putString(getString(R.string.saved_receiver_key), mTfTo.getEditText().getText().toString());
+        outState.putString(getString(R.string.saved_pattern_key), mTfPattern.getEditText().getText().toString());
+
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     @Override
@@ -142,6 +149,12 @@ public class MainActivity extends AppCompatActivity {
         mTfFrom = findViewById(R.id.tf_from);
         mTfTo = findViewById(R.id.tf_to);
         mTfPattern = findViewById(R.id.tf_pattern);
+
+        if (savedInstanceState != null) {
+            mTfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
+            mTfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
+            mTfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));
+        }
 
         // Request necessary permissions
         mSmsPermissionLauncher.launch(new String[] {

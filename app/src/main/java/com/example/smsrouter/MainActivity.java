@@ -1,17 +1,19 @@
 package com.example.smsrouter;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.provider.ContactsContract;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -52,57 +54,23 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-    private final ActivityResultLauncher<String> mContactPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            new ActivityResultCallback<Boolean>() {
+    private final ActivityResultLauncher<Intent> mContactPhoneNumberLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
                 @Override
-                public void onActivityResult(Boolean isGranted) {
-                    if (!isGranted) {
-                        if (mTfFrom.hasFocus()) {
-                            mTfFrom.setError(getString(R.string.error_contact_perm_not_granted));
-                        }
-                        else if (mTfTo.hasFocus()) {
-                            mTfTo.setError(getString(R.string.error_contact_perm_not_granted));
-                        }
-                    }
-                }
-            });
-
-    private final ActivityResultLauncher<Void> mContactPickerLauncher = registerForActivityResult(
-            new ActivityResultContracts.PickContact(),
-            new ActivityResultCallback<Uri>() {
-                @Override
-                public void onActivityResult(Uri result) {
-                    if (result != null) {
-                        boolean hasPhoneNumber = false;
-                        long id = -1;
-
-                        try (Cursor cursor = getContentResolver().query(result, new String[] {
-                                ContactsContract.Contacts.HAS_PHONE_NUMBER,
-                                ContactsContract.Contacts._ID
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Uri contactUri = result.getData().getData();
+                        try (Cursor cursor = getContentResolver().query(contactUri, new String[] {
+                                ContactsContract.CommonDataKinds.Phone.NUMBER
                         }, null, null, null)) {
                             if (cursor != null && cursor.moveToFirst()) {
-                                hasPhoneNumber = cursor.getInt(0) == 1;
-                                id = cursor.getLong(1);
-                            }
-                        }
-
-                        if (hasPhoneNumber) {
-                            try (Cursor phoneCursor = getContentResolver().query(
-                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                    new String[] {
-                                            ContactsContract.CommonDataKinds.Phone.NUMBER
-                                    },
-                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?",
-                                    new String[] { String.valueOf(id) },
-                                    null)) {
-                                if (phoneCursor != null && phoneCursor.moveToFirst()) {
-                                    String number = phoneCursor.getString(0);
-                                    if (mTfFrom.hasFocus()) {
-                                        mTfFrom.getEditText().setText(number);
-                                    } else if (mTfTo.hasFocus()) {
-                                        mTfTo.getEditText().setText(number);
-                                    }
+                                String number = cursor.getString(0);
+                                if (mTfFrom.hasFocus()) {
+                                    mTfFrom.getEditText().setText(number);
+                                }
+                                else if (mTfTo.hasFocus()) {
+                                    mTfTo.getEditText().setText(number);
                                 }
                             }
                         }
@@ -166,32 +134,33 @@ public class MainActivity extends AppCompatActivity {
         this.<TextInputLayout>findViewById(R.id.tf_from).setStartIconOnClickListener(v -> {
             mTfFrom.requestFocus();
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(mTfFrom.getWindowToken(),
-                    InputMethodManager.HIDE_IMPLICIT_ONLY);
+            inputMethodManager.hideSoftInputFromWindow(
+                    mTfFrom.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-            if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-                mContactPickerLauncher.launch(null);
-            }
-            else {
-                mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+            Intent intent = new Intent(Intent.ACTION_PICK)
+                    .setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                mContactPhoneNumberLauncher.launch(intent);
             }
         });
         this.<TextInputLayout>findViewById(R.id.tf_to).setStartIconOnClickListener(v -> {
             mTfTo.requestFocus();
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(mTfTo.getWindowToken(),
-                    InputMethodManager.HIDE_IMPLICIT_ONLY);
+            inputMethodManager.hideSoftInputFromWindow(
+                    mTfTo.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-            if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-                mContactPickerLauncher.launch(null);
-            }
-            else {
-                mContactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+            Intent intent = new Intent(Intent.ACTION_PICK)
+                    .setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                mContactPhoneNumberLauncher.launch(intent);
             }
         });
 
         // Save sender, receiver and message when save button is clicked
         findViewById(R.id.btn_save).setOnClickListener(this::btnSaveOnClick);
+
+        // Format text field
+        mTfTo.getEditText().addTextChangedListener(new PhoneNumberFormattingTextWatcher());
     }
 
     /***

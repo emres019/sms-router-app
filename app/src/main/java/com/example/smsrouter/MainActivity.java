@@ -28,6 +28,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+    @SuppressWarnings("unused")
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private TextInputLayout mTfFrom;
@@ -113,12 +114,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Assign text fields
+        // Initialize fields
         mTfFrom = findViewById(R.id.tf_from);
         mTfTo = findViewById(R.id.tf_to);
         mTfPattern = findViewById(R.id.tf_pattern);
 
-        if (savedInstanceState != null) {
+        // Set text of text fields
+        if (savedInstanceState == null) {
+            SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
+            mTfFrom.getEditText().setText(prefs.getString(getString(R.string.saved_sender_key), ""));
+            mTfTo.getEditText().setText(prefs.getString(getString(R.string.saved_receiver_key), ""));
+            mTfPattern.getEditText().setText(prefs.getString(getString(R.string.saved_pattern_key), ""));
+        }
+        else {
             mTfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
             mTfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
             mTfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));

@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.view.Menu;
@@ -42,9 +41,9 @@ public class MainActivity extends AppCompatActivity {
                             Boolean.FALSE.equals(areGranted.get(Manifest.permission.SEND_SMS))) {
                         // TODO: Change snack bar with something else
                         Snackbar.make(findViewById(android.R.id.content),
-                                getString(R.string.error_sms_perms_not_granted),
-                                Snackbar.LENGTH_INDEFINITE)
-                                .setAction(android.R.string.ok, v -> mSmsPermissionLauncher.launch(new String[] {
+                                        getString(R.string.error_sms_perms_not_granted),
+                                        Snackbar.LENGTH_INDEFINITE)
+                                .setAction(android.R.string.ok, v -> mSmsPermissionLauncher.launch(new String[]{
                                         Manifest.permission.RECEIVE_SMS,
                                         Manifest.permission.SEND_SMS
                                 }))
@@ -60,15 +59,14 @@ public class MainActivity extends AppCompatActivity {
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == RESULT_OK) {
                         final Uri contactUri = result.getData().getData();
-                        try (Cursor cursor = getContentResolver().query(contactUri, new String[] {
+                        try (Cursor cursor = getContentResolver().query(contactUri, new String[]{
                                 ContactsContract.CommonDataKinds.Phone.NUMBER
                         }, null, null, null)) {
                             if (cursor != null && cursor.moveToFirst()) {
                                 String number = cursor.getString(0);
                                 if (binding.tfFrom.hasFocus()) {
                                     binding.tfFrom.getEditText().setText(number);
-                                }
-                                else if (binding.tfTo.hasFocus()) {
+                                } else if (binding.tfTo.hasFocus()) {
                                     binding.tfTo.getEditText().setText(number);
                                 }
                             }
@@ -84,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set switch state
         final SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
-        final SwitchCompat sw = menu.findItem(R.id.app_bar_switch).getActionView().findViewById(R.id.sw_inner);
+        final SwitchCompat sw = menu.findItem(R.id.menu_item_1).getActionView().findViewById(R.id.switch_app_bar);
         sw.setChecked(prefs.getBoolean(getString(R.string.saved_enabled_key), false));
 
         // Set switch listener
@@ -99,12 +97,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
         outState.putString(getString(R.string.saved_sender_key), binding.tfFrom.getEditText().getText().toString());
         outState.putString(getString(R.string.saved_receiver_key), binding.tfTo.getEditText().getText().toString());
         outState.putString(getString(R.string.saved_pattern_key), binding.tfPattern.getEditText().getText().toString());
-
-        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     @Override
@@ -121,15 +119,14 @@ public class MainActivity extends AppCompatActivity {
             binding.tfFrom.getEditText().setText(prefs.getString(getString(R.string.saved_sender_key), ""));
             binding.tfTo.getEditText().setText(prefs.getString(getString(R.string.saved_receiver_key), ""));
             binding.tfPattern.getEditText().setText(prefs.getString(getString(R.string.saved_pattern_key), ""));
-        }
-        else {
+        } else {
             binding.tfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
             binding.tfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
             binding.tfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));
         }
 
         // Request necessary permissions
-        mSmsPermissionLauncher.launch(new String[] {
+        mSmsPermissionLauncher.launch(new String[]{
                 Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.SEND_SMS
         });

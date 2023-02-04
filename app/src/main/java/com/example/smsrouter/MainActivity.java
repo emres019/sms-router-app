@@ -21,8 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
+import com.example.smsrouter.databinding.ActivityMainBinding;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Map;
 
@@ -31,9 +31,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private TextInputLayout mTfFrom;
-    private TextInputLayout mTfTo;
-    private TextInputLayout mTfPattern;
+    private ActivityMainBinding binding;
 
     private final ActivityResultLauncher<String[]> mSmsPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(),
@@ -61,17 +59,17 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == RESULT_OK) {
-                        Uri contactUri = result.getData().getData();
+                        final Uri contactUri = result.getData().getData();
                         try (Cursor cursor = getContentResolver().query(contactUri, new String[] {
                                 ContactsContract.CommonDataKinds.Phone.NUMBER
                         }, null, null, null)) {
                             if (cursor != null && cursor.moveToFirst()) {
                                 String number = cursor.getString(0);
-                                if (mTfFrom.hasFocus()) {
-                                    mTfFrom.getEditText().setText(number);
+                                if (binding.tfFrom.hasFocus()) {
+                                    binding.tfFrom.getEditText().setText(number);
                                 }
-                                else if (mTfTo.hasFocus()) {
-                                    mTfTo.getEditText().setText(number);
+                                else if (binding.tfTo.hasFocus()) {
+                                    binding.tfTo.getEditText().setText(number);
                                 }
                             }
                         }
@@ -85,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_app_bar, menu);
 
         // Set switch state
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
+        final SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
         final SwitchCompat sw = menu.findItem(R.id.app_bar_switch).getActionView().findViewById(R.id.sw_inner);
         sw.setChecked(prefs.getBoolean(getString(R.string.saved_enabled_key), false));
 
@@ -102,9 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-        outState.putString(getString(R.string.saved_sender_key), mTfFrom.getEditText().getText().toString());
-        outState.putString(getString(R.string.saved_receiver_key), mTfTo.getEditText().getText().toString());
-        outState.putString(getString(R.string.saved_pattern_key), mTfPattern.getEditText().getText().toString());
+        outState.putString(getString(R.string.saved_sender_key), binding.tfFrom.getEditText().getText().toString());
+        outState.putString(getString(R.string.saved_receiver_key), binding.tfTo.getEditText().getText().toString());
+        outState.putString(getString(R.string.saved_pattern_key), binding.tfPattern.getEditText().getText().toString());
 
         super.onSaveInstanceState(outState, outPersistentState);
     }
@@ -112,24 +110,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        // Initialize fields
-        mTfFrom = findViewById(R.id.tf_from);
-        mTfTo = findViewById(R.id.tf_to);
-        mTfPattern = findViewById(R.id.tf_pattern);
+        // Inflate layout
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         // Set text of text fields
         if (savedInstanceState == null) {
             SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
-            mTfFrom.getEditText().setText(prefs.getString(getString(R.string.saved_sender_key), ""));
-            mTfTo.getEditText().setText(prefs.getString(getString(R.string.saved_receiver_key), ""));
-            mTfPattern.getEditText().setText(prefs.getString(getString(R.string.saved_pattern_key), ""));
+            binding.tfFrom.getEditText().setText(prefs.getString(getString(R.string.saved_sender_key), ""));
+            binding.tfTo.getEditText().setText(prefs.getString(getString(R.string.saved_receiver_key), ""));
+            binding.tfPattern.getEditText().setText(prefs.getString(getString(R.string.saved_pattern_key), ""));
         }
         else {
-            mTfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
-            mTfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
-            mTfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));
+            binding.tfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
+            binding.tfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
+            binding.tfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));
         }
 
         // Request necessary permissions
@@ -139,11 +135,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Show contact picker when start icons are clicked
-        this.<TextInputLayout>findViewById(R.id.tf_from).setStartIconOnClickListener(v -> {
-            mTfFrom.requestFocus();
+        binding.tfFrom.setStartIconOnClickListener(v -> {
+            binding.tfFrom.requestFocus();
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(
-                    mTfFrom.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+                    binding.tfFrom.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 
             Intent intent = new Intent(Intent.ACTION_PICK)
                     .setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
@@ -151,11 +147,11 @@ public class MainActivity extends AppCompatActivity {
                 mContactPhoneNumberLauncher.launch(intent);
             }
         });
-        this.<TextInputLayout>findViewById(R.id.tf_to).setStartIconOnClickListener(v -> {
-            mTfTo.requestFocus();
+        binding.tfTo.setStartIconOnClickListener(v -> {
+            binding.tfTo.requestFocus();
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(
-                    mTfTo.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+                    binding.tfTo.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 
             Intent intent = new Intent(Intent.ACTION_PICK)
                     .setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
@@ -165,10 +161,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Save sender, receiver and message when save button is clicked
-        findViewById(R.id.btn_save).setOnClickListener(this::btnSaveOnClick);
+        binding.btnSave.setOnClickListener(this::btnSaveOnClick);
 
         // Format text field
-        mTfTo.getEditText().addTextChangedListener(new PhoneNumberFormattingTextWatcher());
+        binding.tfTo.getEditText().addTextChangedListener(new PhoneNumberFormattingTextWatcher());
     }
 
     /***
@@ -176,22 +172,22 @@ public class MainActivity extends AppCompatActivity {
      * @param btn Save button
      */
     private void btnSaveOnClick(View btn) {
-        String from = mTfFrom.getEditText().getText().toString().trim();
-        String to = mTfTo.getEditText().getText().toString().trim();
-        String pattern = mTfPattern.getEditText().getText().toString().trim();
+        String from = binding.tfFrom.getEditText().getText().toString().trim();
+        String to = binding.tfTo.getEditText().getText().toString().trim();
+        String pattern = binding.tfPattern.getEditText().getText().toString().trim();
 
         if (from.isEmpty()) {
-            mTfFrom.setError(getString(R.string.error_text_empty));
+            binding.tfFrom.setError(getString(R.string.error_text_empty));
             return;
         }
 
         if (to.isEmpty()) {
-            mTfTo.setError(getString(R.string.error_text_empty));
+            binding.tfTo.setError(getString(R.string.error_text_empty));
             return;
         }
 
         if (pattern.isEmpty()) {
-            mTfPattern.setError(getString(R.string.error_text_empty));
+            binding.tfPattern.setError(getString(R.string.error_text_empty));
             return;
         }
 

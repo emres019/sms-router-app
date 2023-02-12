@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -166,6 +168,50 @@ public class MainActivity extends AppCompatActivity {
 
         // Format text field
         binding.tfTo.getEditText().addTextChangedListener(new PhoneNumberFormattingTextWatcher());
+
+        // Clear error text when text field is typed in
+        binding.tfFrom.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (binding.tfFrom.isErrorEnabled()) {
+                    binding.tfFrom.setError(null);
+                }
+            }
+        });
+        binding.tfTo.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (binding.tfTo.isErrorEnabled()) {
+                    binding.tfTo.setError(null);
+                }
+            }
+        });
+        binding.tfPattern.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (binding.tfPattern.isErrorEnabled()) {
+                    binding.tfPattern.setError(null);
+                }
+            }
+        });
     }
 
     /***

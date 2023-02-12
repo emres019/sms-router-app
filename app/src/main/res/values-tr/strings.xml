@@ -13,10 +13,9 @@
     <eat-comment />
     <string name="error_text_empty">Bu alan boş bırakılamaz</string>
     <string name="error_sms_perms_not_granted">SMS izinleri uygulamanın çalışması için gerekli</string>
-    <string name="error_contact_perm_not_granted">Bu izin kişinin numarasını çekmek için gerekli</string>
 
     <!-- Auto message -->
     <eat-comment />
     <string name="auto_msg_text">Merhaba, bu bir otomatik mesajdır. Lütfen cevaplamayınız.\n
-        Belirtilen modele uygun şu ifadeleri buldum: </string>
+Belirtilen modele uygun şu ifadeleri buldum: </string>
 </resources>

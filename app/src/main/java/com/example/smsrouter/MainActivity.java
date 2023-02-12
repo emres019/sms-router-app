@@ -29,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressWarnings("unused")
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String[] SMS_PERMISSIONS = {
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.SEND_SMS
+    };
 
     private ActivityMainBinding binding;
 
@@ -43,10 +47,8 @@ public class MainActivity extends AppCompatActivity {
                         Snackbar.make(findViewById(android.R.id.content),
                                         getString(R.string.error_sms_perms_not_granted),
                                         Snackbar.LENGTH_INDEFINITE)
-                                .setAction(android.R.string.ok, v -> mSmsPermissionLauncher.launch(new String[]{
-                                        Manifest.permission.RECEIVE_SMS,
-                                        Manifest.permission.SEND_SMS
-                                }))
+                                .setAction(android.R.string.ok, v ->
+                                        mSmsPermissionLauncher.launch(SMS_PERMISSIONS))
                                 .show();
                     }
                 }
@@ -74,6 +76,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Request necessary permissions
+        mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -125,12 +135,6 @@ public class MainActivity extends AppCompatActivity {
             binding.tfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));
         }
 
-        // Request necessary permissions
-        mSmsPermissionLauncher.launch(new String[]{
-                Manifest.permission.RECEIVE_SMS,
-                Manifest.permission.SEND_SMS
-        });
-
         // Show contact picker when start icons are clicked
         binding.tfFrom.setStartIconOnClickListener(v -> {
             binding.tfFrom.requestFocus();
@@ -158,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Save sender, receiver and message when save button is clicked
-        binding.btnSave.setOnClickListener(this::btnSaveOnClick);
+        binding.btnSave.setOnClickListener(this::btnSave_OnClick);
 
         // Format text field
         binding.tfTo.getEditText().addTextChangedListener(new PhoneNumberFormattingTextWatcher());
@@ -168,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
      * Saves sender, receiver and pattern to shared preferences.
      * @param btn Save button
      */
-    private void btnSaveOnClick(View btn) {
+    private void btnSave_OnClick(View btn) {
         String from = binding.tfFrom.getEditText().getText().toString().trim();
         String to = binding.tfTo.getEditText().getText().toString().trim();
         String pattern = binding.tfPattern.getEditText().getText().toString().trim();

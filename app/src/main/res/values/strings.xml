@@ -14,17 +14,15 @@
     <string name="saved_sender_key" translatable="false">sender_phone</string>
     <string name="saved_receiver_key" translatable="false">receiver_phone</string>
     <string name="saved_pattern_key" translatable="false">message_pattern</string>
-    <string name="preferences_file_key" translatable="false">com.example.smsreceiver.DataPrefs</string>
+    <string name="preferences_file_key" translatable="false">com.example.smsrouter.DataPrefs</string>
 
     <!-- Error messages -->
     <eat-comment />
     <string name="error_text_empty">This area cannot be empty</string>
     <string name="error_sms_perms_not_granted">SMS permissions are required to work</string>
-    <string name="error_contact_perm_not_granted">The permission is necessary for getting contact info</string>
 
     <!-- Auto message -->
     <eat-comment />
-    <string name="auto_msg_text">
-        Hello, it\'s an automated message. Please don\'t reply to this message.\n
-        I found these that fit the pattern: </string>
+    <string name="auto_msg_text">Hello, it\'s an automated message. Please don\'t reply to this message.\n
+I found these that fit the pattern: </string>
 </resources>

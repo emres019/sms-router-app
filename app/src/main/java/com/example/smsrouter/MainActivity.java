@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private ActivityMainBinding binding;
+    private SharedPreferences mSharedPreferences;
 
     private final ActivityResultLauncher<String[]> mSmsPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(),
@@ -93,14 +94,13 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_app_bar, menu);
 
         // Set switch state
-        final SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
         final SwitchCompat sw = menu.findItem(R.id.menu_item_1).getActionView().findViewById(R.id.switch_app_bar);
-        sw.setChecked(prefs.getBoolean(getString(R.string.saved_enabled_key), false));
+        sw.setChecked(mSharedPreferences.getBoolean(getString(R.string.saved_enabled_key), false));
 
         // Set switch listener
         sw.setOnCheckedChangeListener((compoundButton, isChecked) -> {
             // Update shared preferences
-            prefs.edit()
+            mSharedPreferences.edit()
                     .putBoolean(getString(R.string.saved_enabled_key), isChecked)
                     .apply();
         });
@@ -125,12 +125,19 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        mSharedPreferences = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
+
         // Set text of text fields
         if (savedInstanceState == null) {
-            SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
-            binding.tfFrom.getEditText().setText(prefs.getString(getString(R.string.saved_sender_key), ""));
-            binding.tfTo.getEditText().setText(prefs.getString(getString(R.string.saved_receiver_key), ""));
-            binding.tfPattern.getEditText().setText(prefs.getString(getString(R.string.saved_pattern_key), ""));
+            binding.tfFrom.getEditText().setText(mSharedPreferences.getString(
+                    getString(R.string.saved_sender_key), "")
+            );
+            binding.tfTo.getEditText().setText(mSharedPreferences.getString(
+                    getString(R.string.saved_receiver_key), "")
+            );
+            binding.tfPattern.getEditText().setText(mSharedPreferences.getString(
+                    getString(R.string.saved_pattern_key), "")
+            );
         } else {
             binding.tfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
             binding.tfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
@@ -214,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /***
+    /**
      * Saves sender, receiver and pattern to shared preferences.
      * @param btn Save button
      */
@@ -239,8 +246,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Save data to shared preferences
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
-        prefs.edit()
+        mSharedPreferences.edit()
                 .putString(getString(R.string.saved_sender_key), from)
                 .putString(getString(R.string.saved_receiver_key), to)
                 .putString(getString(R.string.saved_pattern_key), pattern)

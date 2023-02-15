@@ -15,7 +15,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,7 +81,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    /***
+    /**
      * Sends SMS message
      * @param message Message to send
      * @param receiver Receiver phone number / address
@@ -92,18 +92,18 @@ public class SmsReceiver extends BroadcastReceiver {
         smsManager.sendTextMessage(receiver, null, message, null, null);
     }
 
-    /***
+    /**
      * Gets matches from message
      * @param message Message to match
      * @param messagePattern Pattern to match
-     * @return LinkedList of matches
+     * @return ArrayList of matches
      */
     @NonNull
     private List<String> getMatches(String message, String messagePattern) {
         Pattern pattern = Pattern.compile(messagePattern, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(message);
 
-        List<String> matches = new LinkedList<>();
+        List<String> matches = new ArrayList<>();
         while (matcher.find()) {
             matches.add(matcher.group());
         }

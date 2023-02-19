@@ -7,6 +7,7 @@
     <string name="tf_to_hint">To</string>
     <string name="tf_pattern_hint">Pattern</string>
     <string name="btn_save_text">Save</string>
+    <string name="toast_save_text">Saved successfully</string>
 
     <!-- Shared preferences keys -->
     <eat-comment />

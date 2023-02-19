@@ -13,6 +13,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -26,6 +27,7 @@ import com.example.smsrouter.databinding.ActivityMainBinding;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -253,10 +255,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Save data to shared preferences
-        mSharedPreferences.edit()
-                .putString(getString(R.string.saved_sender_key), from)
-                .putString(getString(R.string.saved_receiver_key), to)
-                .putString(getString(R.string.saved_pattern_key), pattern)
-                .apply();
+        Executors.newSingleThreadExecutor().execute(() -> {
+            mSharedPreferences.edit()
+                    .putString(getString(R.string.saved_sender_key), from)
+                    .putString(getString(R.string.saved_receiver_key), to)
+                    .putString(getString(R.string.saved_pattern_key), pattern)
+                    .commit();
+
+            runOnUiThread(()-> Toast.makeText(MainActivity.this,
+                    getString(R.string.toast_save_text), Toast.LENGTH_SHORT).show());
+        });
     }
 }

@@ -22,7 +22,6 @@
     <string name="error_sms_perms_not_granted">SMS permissions are required to work</string>
 
     <!-- Auto message -->
-    <eat-comment />
-    <string name="auto_msg_text">Hello, it\'s an automated message. Please don\'t reply to this message.\n
-I found these that fit the pattern: </string>
+    <string name="auto_msg_text">"Hello, it's an automated message. Please don't reply to this message.
+I found these that fit the pattern: %1$s"</string>
 </resources>

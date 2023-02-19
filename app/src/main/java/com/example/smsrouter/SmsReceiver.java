@@ -58,7 +58,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     return;
                 }
 
-                for (byte[] bytes: pdus) {
+                for (byte[] bytes : pdus) {
                     SmsMessage message = SmsMessage.createFromPdu(bytes, format);
 
                     String strippedSender = PhoneNumberUtils.stripSeparators(sender);
@@ -72,8 +72,8 @@ public class SmsReceiver extends BroadcastReceiver {
                         // Send SMS
                         List<String> matches = getMatches(message.getMessageBody(), messagePattern);
                         if (!matches.isEmpty()) {
-                            sendSms(context.getString(R.string.auto_msg_text)
-                                    + String.join(", ", matches), receiver);
+                            sendSms(context.getString(R.string.auto_msg_text,
+                                    String.join(", ", matches)), receiver);
                         }
                     }
                 }
@@ -83,8 +83,10 @@ public class SmsReceiver extends BroadcastReceiver {
 
     /**
      * Sends SMS message
-     * @param message Message to send
+     *
+     * @param message  Message to send
      * @param receiver Receiver phone number / address
+     * @see SmsManager
      */
     @RequiresPermission(android.Manifest.permission.SEND_SMS)
     private void sendSms(String message, String receiver) {
@@ -94,9 +96,10 @@ public class SmsReceiver extends BroadcastReceiver {
 
     /**
      * Gets matches from message
-     * @param message Message to match
+     *
+     * @param message        Message to match
      * @param messagePattern Pattern to match
-     * @return ArrayList of matches
+     * @return {@link ArrayList} of matches
      */
     @NonNull
     private List<String> getMatches(String message, String messagePattern) {

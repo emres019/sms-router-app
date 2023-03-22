@@ -30,9 +30,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-
-    @SuppressWarnings("unused")
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String[] SMS_PERMISSIONS = {
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.SEND_SMS
@@ -81,14 +78,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        // Request necessary permissions
-        mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -239,6 +228,9 @@ public class MainActivity extends AppCompatActivity {
         String to = binding.tfTo.getEditText().getText().toString().trim();
         String pattern = binding.tfPattern.getEditText().getText().toString().trim();
 
+        // Request necessary permissions
+        mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
+
         if (from.isEmpty()) {
             binding.tfFrom.setError(getString(R.string.error_text_empty));
             return;
@@ -262,8 +254,9 @@ public class MainActivity extends AppCompatActivity {
                     .putString(getString(R.string.saved_pattern_key), pattern)
                     .commit();
 
-            runOnUiThread(()-> Toast.makeText(MainActivity.this,
-                    getString(R.string.toast_save_text), Toast.LENGTH_SHORT).show());
+            runOnUiThread(() ->
+                    Toast.makeText(this, getString(R.string.toast_save_text), Toast.LENGTH_SHORT).show()
+            );
         });
     }
 }

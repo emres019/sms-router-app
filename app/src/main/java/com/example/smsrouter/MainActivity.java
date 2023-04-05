@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -49,8 +50,17 @@ public class MainActivity extends AppCompatActivity {
                         Snackbar.make(findViewById(android.R.id.content),
                                         getString(R.string.error_sms_perms_not_granted),
                                         Snackbar.LENGTH_INDEFINITE)
-                                .setAction(android.R.string.ok, v ->
-                                        mSmsPermissionLauncher.launch(SMS_PERMISSIONS))
+                                .setAction(android.R.string.ok, v -> {
+                                    if (!shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS)) {
+                                        // If user hit "Don't ask again" button, open app settings
+                                        // to let user grant permission
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        intent.setData(Uri.fromParts("package", getPackageName(), null));
+                                        startActivity(intent);
+                                    } else {
+                                        mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
+                                    }
+                                })
                                 .show();
                     }
                 }

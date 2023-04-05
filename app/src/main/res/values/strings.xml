@@ -1,12 +1,18 @@
 <resources>
     <string name="app_name">SMS Router</string>
 
-    <!-- UI related data -->
+    <!-- Text fields -->
     <eat-comment />
     <string name="tf_from_hint">From</string>
     <string name="tf_to_hint">To</string>
     <string name="tf_pattern_hint">Pattern</string>
+
+    <!-- Buttons -->
+    <eat-comment />
     <string name="btn_save_text">Save</string>
+
+    <!-- Toasts -->
+    <eat-comment />
     <string name="toast_save_text">Saved successfully</string>
 
     <!-- Shared preferences keys -->

@@ -43,12 +43,14 @@ public class SmsReceiver extends BroadcastReceiver {
                 }
 
                 for (SmsMessage message : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
+
                     String strippedSender = PhoneNumberUtils.stripSeparators(sender);
                     String strippedMessageAddress = PhoneNumberUtils.stripSeparators(message.getOriginatingAddress());
                     boolean isMessageFromSender = (PhoneNumberUtils.isGlobalPhoneNumber(strippedMessageAddress)
                             ? strippedMessageAddress : message.getOriginatingAddress()).equals(
                             PhoneNumberUtils.isGlobalPhoneNumber(strippedSender) ? strippedSender : sender
                     );
+
                     if (isMessageFromSender && context.checkSelfPermission(android.Manifest.permission.SEND_SMS)
                             == PackageManager.PERMISSION_GRANTED) {
                         // Send SMS
@@ -60,13 +62,14 @@ public class SmsReceiver extends BroadcastReceiver {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
 
         }
     }
 
     /**
      * Sends SMS message
+     *
      * @param message  Message to send
      * @param receiver Receiver phone number / address
      * @see SmsManager

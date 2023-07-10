@@ -9,6 +9,7 @@ import android.provider.Telephony;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.telephony.SubscriptionManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
@@ -23,74 +24,80 @@ public class SmsReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         try {
-            SharedPreferences prefs = context.getSharedPreferences(context.getString(R.string.preferences_file_key), Context.MODE_PRIVATE);
-            if (intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION) &&
-                    prefs.getBoolean(context.getString(R.string.saved_enabled_key), false)) {
-                // Get shared preferences data
-                String sender = prefs.getString(context.getString(R.string.saved_sender_key), null);
-                if (sender == null) {
-                    return;
+            SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.prefs_file_path), Context.MODE_PRIVATE);
+            if (!intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
+                    || !sharedPreferences.getBoolean(context.getString(R.string.prefs_key_app_enabled), false)) {
+                return;
+            }
+
+            String savedSender = sharedPreferences.getString(context.getString(R.string.prefs_key_sender), null);
+            if (savedSender == null) {
+                return;
+            }
+
+            String receiver = sharedPreferences.getString(context.getString(R.string.prefs_key_receiver), null);
+            if (receiver == null) {
+                return;
+            }
+
+            String messagePattern = sharedPreferences.getString(context.getString(R.string.prefs_key_pattern), null);
+            if (messagePattern == null) {
+                return;
+            }
+
+            for (SmsMessage message : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
+
+                String messageSender = message.getOriginatingAddress();
+                String plainSavedSender = PhoneNumberUtils.stripSeparators(savedSender);
+                String plainMessageSender = PhoneNumberUtils.stripSeparators(messageSender);
+                boolean isSavedSenderPhoneNumber = PhoneNumberUtils.isGlobalPhoneNumber(plainSavedSender);
+                boolean isMessageSenderPhoneNumber = PhoneNumberUtils.isGlobalPhoneNumber(plainMessageSender);
+
+                boolean isMessageFromSender;
+                if (isMessageSenderPhoneNumber && isSavedSenderPhoneNumber) {
+                    isMessageFromSender = plainSavedSender.equals(plainMessageSender);
+                } else {
+                    isMessageFromSender = savedSender.equals(messageSender);
                 }
 
-                String receiver = prefs.getString(context.getString(R.string.saved_receiver_key), null);
-                if (receiver == null) {
-                    return;
-                }
-
-                String messagePattern = prefs.getString(context.getString(R.string.saved_pattern_key), null);
-                if (messagePattern == null) {
-                    return;
-                }
-
-                for (SmsMessage message : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
-
-                    String strippedSender = PhoneNumberUtils.stripSeparators(sender);
-                    String strippedMessageAddress = PhoneNumberUtils.stripSeparators(message.getOriginatingAddress());
-                    boolean isMessageFromSender = (PhoneNumberUtils.isGlobalPhoneNumber(strippedMessageAddress)
-                            ? strippedMessageAddress : message.getOriginatingAddress()).equals(
-                            PhoneNumberUtils.isGlobalPhoneNumber(strippedSender) ? strippedSender : sender
-                    );
-
-                    if (isMessageFromSender && context.checkSelfPermission(android.Manifest.permission.SEND_SMS)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        // Send SMS
-                        List<String> matches = getMatches(message.getMessageBody(), messagePattern);
-                        if (!matches.isEmpty()) {
-                            sendSms(context.getString(R.string.auto_msg_text,
-                                    String.join(", ", matches)), receiver);
-                        }
+                if (isMessageFromSender && context.checkSelfPermission(android.Manifest.permission.SEND_SMS)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    List<String> matches = getMatches(message.getMessageBody(), messagePattern);
+                    if (!matches.isEmpty()) {
+                        sendSms(context.getString(R.string.auto_msg_text,
+                                String.join(", ", matches)), receiver);
                     }
                 }
             }
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
 
         }
     }
 
     /**
-     * Sends SMS message
-     *
-     * @param message  Message to send
-     * @param receiver Receiver phone number / address
      * @see SmsManager
      */
     @RequiresPermission(android.Manifest.permission.SEND_SMS)
-    private void sendSms(String message, String receiver) {
-        SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(receiver, null, message, null, null);
+    private void sendSms(String message, String to) {
+
+        int smsSubscriptionId = SmsManager.getDefaultSmsSubscriptionId();
+        if (smsSubscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            return;
+        }
+
+        SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(smsSubscriptionId);
+        smsManager.sendTextMessage(to, null, message, null, null);
     }
 
     /**
-     * Gets matches from message
+     * Gets matches that fit the pattern in the message
      *
-     * @param message        Message to match
-     * @param messagePattern Pattern to match
      * @return {@link ArrayList} of matches
      */
     @NonNull
-    private List<String> getMatches(String message, String messagePattern) {
-        Pattern pattern = Pattern.compile(messagePattern, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(message);
+    private List<String> getMatches(String message, String pattern) {
+
+        Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(message);
 
         List<String> matches = new ArrayList<>();
         while (matcher.find()) {

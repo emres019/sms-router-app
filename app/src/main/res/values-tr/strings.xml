@@ -14,7 +14,8 @@
 
     <!-- Toasts -->
     <eat-comment />
-    <string name="toast_save_text">Başarıyla kaydedildi</string>
+    <string name="toast_save_successful">Başarıyla kaydedildi</string>
+    <string name="toast_save_failed">Kaydetme başarısız</string>
 
     <!-- Error messages -->
     <eat-comment />

@@ -1,6 +1,9 @@
 package com.example.smsrouter;
 
 import android.Manifest;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -31,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
+
     private static final String[] SMS_PERMISSIONS = {
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.SEND_SMS
@@ -43,26 +47,33 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultContracts.RequestMultiplePermissions(),
             new ActivityResultCallback<Map<String, Boolean>>() {
                 @Override
-                public void onActivityResult(Map<String, Boolean> areGranted) {
-                    if (Boolean.FALSE.equals(areGranted.get(Manifest.permission.RECEIVE_SMS)) ||
-                            Boolean.FALSE.equals(areGranted.get(Manifest.permission.SEND_SMS))) {
-                        // TODO: Change snack bar with something else
-                        Snackbar.make(findViewById(android.R.id.content),
-                                        getString(R.string.error_sms_perms_not_granted),
-                                        Snackbar.LENGTH_INDEFINITE)
-                                .setAction(android.R.string.ok, v -> {
-                                    if (!shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS)) {
-                                        // If user hit "Don't ask again" button, open app settings
-                                        // to let user grant permission
-                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                        intent.setData(Uri.fromParts("package", getPackageName(), null));
-                                        startActivity(intent);
-                                    } else {
-                                        mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
-                                    }
-                                })
-                                .show();
+                public void onActivityResult(Map<String, Boolean> arePermissionsGranted) {
+
+                    boolean receiveSmsPermissionGranted = Boolean.TRUE.equals(arePermissionsGranted.get(
+                            Manifest.permission.RECEIVE_SMS));
+                    boolean sendSmsPermissionGranted = Boolean.TRUE.equals(arePermissionsGranted.get(
+                            Manifest.permission.SEND_SMS));
+                    if (receiveSmsPermissionGranted && sendSmsPermissionGranted) {
+                        return;
                     }
+
+                    Snackbar.make(findViewById(android.R.id.content),
+                                    getString(R.string.error_sms_perms_not_granted),
+                                    Snackbar.LENGTH_INDEFINITE
+                            )
+                            .setAction(android.R.string.ok, v -> {
+
+                                boolean userHitDontAskAgain = !shouldShowRequestPermissionRationale(Manifest.permission.RECEIVE_SMS)
+                                        || !shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS);
+                                if (userHitDontAskAgain) {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.fromParts("package", getPackageName(), null));
+                                    startActivity(intent);
+                                } else {
+                                    mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
+                                }
+                            })
+                            .show();
                 }
             });
 
@@ -71,18 +82,21 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == RESULT_OK) {
-                        final Uri contactUri = result.getData().getData();
-                        try (Cursor cursor = getContentResolver().query(contactUri, new String[]{
-                                ContactsContract.CommonDataKinds.Phone.NUMBER
-                        }, null, null, null)) {
-                            if (cursor != null && cursor.moveToFirst()) {
-                                String number = cursor.getString(0);
-                                if (binding.tfFrom.hasFocus()) {
-                                    binding.tfFrom.getEditText().setText(number);
-                                } else if (binding.tfTo.hasFocus()) {
-                                    binding.tfTo.getEditText().setText(number);
-                                }
+
+                    if (result.getResultCode() != RESULT_OK) {
+                        return;
+                    }
+
+                    final Uri contactUri = result.getData().getData();
+                    try (Cursor cursor = getContentResolver().query(contactUri, new String[]{
+                            ContactsContract.CommonDataKinds.Phone.NUMBER
+                    }, null, null, null)) {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            String contactNumber = cursor.getString(0);
+                            if (binding.tfFrom.hasFocus()) {
+                                binding.tfFrom.getEditText().setText(contactNumber);
+                            } else if (binding.tfTo.hasFocus()) {
+                                binding.tfTo.getEditText().setText(contactNumber);
                             }
                         }
                     }
@@ -91,20 +105,23 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate menu
+
         getMenuInflater().inflate(R.menu.menu_app_bar, menu);
 
         // Set switch state
         final SwitchCompat sw = menu.findItem(R.id.menu_item_1).getActionView().findViewById(R.id.switch_app_bar);
-        sw.setChecked(mSharedPreferences.getBoolean(getString(R.string.saved_enabled_key), false));
-
-        // Set switch listener
         sw.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            // Update shared preferences
+            if (isChecked) {
+                scheduleDummyJob();
+            } else {
+                cancelDummyJob();
+            }
+
             mSharedPreferences.edit()
-                    .putBoolean(getString(R.string.saved_enabled_key), isChecked)
+                    .putBoolean(getString(R.string.prefs_key_app_enabled), isChecked)
                     .apply();
         });
+        sw.setChecked(mSharedPreferences.getBoolean(getString(R.string.prefs_key_app_enabled), false));
 
         return true;
     }
@@ -113,36 +130,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString(getString(R.string.saved_sender_key), binding.tfFrom.getEditText().getText().toString());
-        outState.putString(getString(R.string.saved_receiver_key), binding.tfTo.getEditText().getText().toString());
-        outState.putString(getString(R.string.saved_pattern_key), binding.tfPattern.getEditText().getText().toString());
+        outState.putString(getString(R.string.prefs_key_sender), binding.tfFrom.getEditText().getText().toString());
+        outState.putString(getString(R.string.prefs_key_receiver), binding.tfTo.getEditText().getText().toString());
+        outState.putString(getString(R.string.prefs_key_pattern), binding.tfPattern.getEditText().getText().toString());
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate layout
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mSharedPreferences = getSharedPreferences(getString(R.string.preferences_file_key), MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences(getString(R.string.prefs_file_path), MODE_PRIVATE);
 
         // Set text of text fields
         if (savedInstanceState == null) {
             binding.tfFrom.getEditText().setText(mSharedPreferences.getString(
-                    getString(R.string.saved_sender_key), "")
+                    getString(R.string.prefs_key_sender), "")
             );
             binding.tfTo.getEditText().setText(mSharedPreferences.getString(
-                    getString(R.string.saved_receiver_key), "")
+                    getString(R.string.prefs_key_receiver), "")
             );
             binding.tfPattern.getEditText().setText(mSharedPreferences.getString(
-                    getString(R.string.saved_pattern_key), "")
+                    getString(R.string.prefs_key_pattern), "")
             );
         } else {
-            binding.tfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_sender_key)));
-            binding.tfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_receiver_key)));
-            binding.tfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.saved_pattern_key)));
+            binding.tfFrom.getEditText().setText(savedInstanceState.getString(getString(R.string.prefs_key_sender)));
+            binding.tfTo.getEditText().setText(savedInstanceState.getString(getString(R.string.prefs_key_receiver)));
+            binding.tfPattern.getEditText().setText(savedInstanceState.getString(getString(R.string.prefs_key_pattern)));
         }
 
         // Show contact picker when start icons are clicked
@@ -180,12 +196,10 @@ public class MainActivity extends AppCompatActivity {
         // Clear error text when text field is typed in
         binding.tfFrom.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -196,12 +210,10 @@ public class MainActivity extends AppCompatActivity {
         });
         binding.tfTo.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -212,12 +224,10 @@ public class MainActivity extends AppCompatActivity {
         });
         binding.tfPattern.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void afterTextChanged(Editable editable) {
@@ -228,17 +238,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Saves sender, receiver and pattern to shared preferences.
-     *
-     * @param btn Save button
-     */
     private void btnSave_OnClick(View btn) {
+
         String from = binding.tfFrom.getEditText().getText().toString().trim();
         String to = binding.tfTo.getEditText().getText().toString().trim();
         String pattern = binding.tfPattern.getEditText().getText().toString().trim();
 
-        // Request necessary permissions
         mSmsPermissionLauncher.launch(SMS_PERMISSIONS);
 
         if (from.isEmpty()) {
@@ -256,17 +261,45 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Save data to shared preferences
         Executors.newSingleThreadExecutor().execute(() -> {
-            mSharedPreferences.edit()
-                    .putString(getString(R.string.saved_sender_key), from)
-                    .putString(getString(R.string.saved_receiver_key), to)
-                    .putString(getString(R.string.saved_pattern_key), pattern)
+            boolean isSuccessful = mSharedPreferences.edit()
+                    .putString(getString(R.string.prefs_key_sender), from)
+                    .putString(getString(R.string.prefs_key_receiver), to)
+                    .putString(getString(R.string.prefs_key_pattern), pattern)
                     .commit();
 
-            runOnUiThread(() ->
-                    Toast.makeText(this, getString(R.string.toast_save_text), Toast.LENGTH_SHORT).show()
-            );
+            runOnUiThread(() -> {
+                if (isSuccessful) {
+                    Toast.makeText(this, getString(R.string.toast_save_successful), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, getString(R.string.toast_save_failed), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
+    }
+
+    /**
+     * Schedules a dummy job one day apart to keep app alive. If already scheduled, replaces previous
+     * job with the new one.
+     */
+    private void scheduleDummyJob() {
+
+        long oneDayInterval = 1000 * 60 * 60 * 24;
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(
+                new JobInfo.Builder(DummyJobService.DUMMY_JOB_ID, new ComponentName(this, DummyJobService.class))
+                        .setPersisted(true)
+                        .setPeriodic(oneDayInterval)
+                        .build()
+        );
+    }
+
+    /**
+     * Cancels dummy job. If not scheduled, does nothing.
+     */
+    private void cancelDummyJob() {
+
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        jobScheduler.cancel(DummyJobService.DUMMY_JOB_ID);
     }
 }

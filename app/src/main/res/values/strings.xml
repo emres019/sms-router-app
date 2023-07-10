@@ -13,15 +13,16 @@
 
     <!-- Toasts -->
     <eat-comment />
-    <string name="toast_save_text">Saved successfully</string>
+    <string name="toast_save_successful">Saved successfully</string>
+    <string name="toast_save_failed">Save failed</string>
 
     <!-- Shared preferences keys -->
     <eat-comment />
-    <string name="saved_enabled_key" translatable="false">is_app_enabled</string>
-    <string name="saved_sender_key" translatable="false">sender_phone</string>
-    <string name="saved_receiver_key" translatable="false">receiver_phone</string>
-    <string name="saved_pattern_key" translatable="false">message_pattern</string>
-    <string name="preferences_file_key" translatable="false">com.example.smsrouter.DataPrefs</string>
+    <string name="prefs_key_app_enabled" translatable="false">is_app_enabled</string>
+    <string name="prefs_key_sender" translatable="false">sender_phone</string>
+    <string name="prefs_key_receiver" translatable="false">receiver_phone</string>
+    <string name="prefs_key_pattern" translatable="false">message_pattern</string>
+    <string name="prefs_file_path" translatable="false">com.example.smsrouter.DataPrefs</string>
 
     <!-- Error messages -->
     <eat-comment />

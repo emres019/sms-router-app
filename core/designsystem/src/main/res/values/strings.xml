@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screens -->
+    <eat-comment />
+    <string name="screen_home_title">Home</string>
+    <string name="screen_inbox_title">Inbox</string>
+    <string name="screen_history_title">History</string>
+    <string name="screen_profile_title">Profile</string>
+</resources>

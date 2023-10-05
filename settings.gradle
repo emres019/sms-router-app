@@ -14,3 +14,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Sms Router"
 include ':app'
+include ':feature:home'
+include ':core:utility'
+include ':core:database'
+include ':core:designsystem'

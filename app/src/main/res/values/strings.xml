@@ -1,35 +1,5 @@
 <resources>
-    <string name="app_name">SMS Router</string>
-
-    <!-- Text fields -->
+    <!-- Quick settings tiles -->
     <eat-comment />
-    <string name="tf_from_hint">From</string>
-    <string name="tf_to_hint">To</string>
-    <string name="tf_pattern_hint">Pattern</string>
-
-    <!-- Buttons -->
-    <eat-comment />
-    <string name="btn_save_text">Save</string>
-
-    <!-- Toasts -->
-    <eat-comment />
-    <string name="toast_save_successful">Saved successfully</string>
-    <string name="toast_save_failed">Save failed</string>
-
-    <!-- Shared preferences keys -->
-    <eat-comment />
-    <string name="prefs_key_app_enabled" translatable="false">is_app_enabled</string>
-    <string name="prefs_key_sender" translatable="false">sender_phone</string>
-    <string name="prefs_key_receiver" translatable="false">receiver_phone</string>
-    <string name="prefs_key_pattern" translatable="false">message_pattern</string>
-    <string name="prefs_file_path" translatable="false">com.example.smsrouter.DataPrefs</string>
-
-    <!-- Error messages -->
-    <eat-comment />
-    <string name="error_text_empty">This area cannot be empty</string>
-    <string name="error_sms_perms_not_granted">SMS permissions are required to work</string>
-
-    <!-- Auto message -->
-    <string name="auto_msg_text">"Hello, it's an automated message. Please don't reply to this message.
-I found these that fit the pattern: %1$s"</string>
+    <string name="tile_routing_label">SMS Routing</string>
 </resources>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.github.emresarincioglu.smsrouter.feature.home.HomeViewModel" />
+
+        <variable
+            name="sender"
+            type="com.github.emresarincioglu.smsrouter.feature.home.model.Sender" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        style="?materialCardViewFilledStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="?android:colorBackground"
+        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.None">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="16dp">
+
+            <!-- TODO: Change default image -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_sender"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:importantForAccessibility="no"
+                android:padding="1dp"
+                app:defaultImage="@{@drawable/ic_person_24}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:remoteSrc="@{sender.image}"
+                app:shapeAppearanceOverlay="?shapeAppearanceCornerExtraLarge"
+                app:strokeColor="?colorPrimary"
+                app:strokeWidth="1dp"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{sender.name}"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                app:layout_constraintEnd_toStartOf="@id/divider"
+                app:layout_constraintStart_toEndOf="@+id/iv_sender"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="John Doe" />
+
+            <TextView
+                android:id="@+id/tv_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{sender.address}"
+                app:layout_constraintEnd_toEndOf="@id/tv_name"
+                app:layout_constraintStart_toStartOf="@id/tv_name"
+                app:layout_constraintTop_toBottomOf="@id/tv_name"
+                tools:text="+90 555 123 45 67" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_sms"
+                style="@style/Widget.Material3.Chip.Suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:checked="@{sender.smsGatewayEnabled}"
+                android:clickable="false"
+                android:text="@string/chip_sms_text"
+                android:textAppearance="?textAppearanceLabelSmall"
+                app:chipEndPadding="2dp"
+                app:chipMinHeight="24dp"
+                app:chipStartPadding="2dp"
+                app:ensureMinTouchTargetSize="false"
+                app:layout_constraintStart_toStartOf="@id/tv_address"
+                app:layout_constraintTop_toBottomOf="@id/tv_address"
+                app:rippleColor="@null" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_in_app"
+                style="@style/Widget.Material3.Chip.Suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:checked="@{sender.inAppGatewayEnabled}"
+                android:clickable="false"
+                android:text="@string/chip_in_app_text"
+                android:textAppearance="?textAppearanceLabelSmall"
+                app:chipEndPadding="2dp"
+                app:chipMinHeight="24dp"
+                app:chipStartPadding="2dp"
+                app:ensureMinTouchTargetSize="false"
+                app:layout_constraintStart_toEndOf="@id/chip_sms"
+                app:layout_constraintTop_toTopOf="@id/chip_sms"
+                app:rippleColor="@null" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_email"
+                style="@style/Widget.Material3.Chip.Suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:checked="@{sender.emailGatewayEnabled}"
+                android:clickable="false"
+                android:text="@string/chip_email_text"
+                android:textAppearance="?textAppearanceLabelSmall"
+                app:chipEndPadding="2dp"
+                app:chipMinHeight="24dp"
+                app:chipStartPadding="2dp"
+                app:ensureMinTouchTargetSize="false"
+                app:layout_constraintStart_toEndOf="@id/chip_in_app"
+                app:layout_constraintTop_toTopOf="@id/chip_in_app"
+                app:rippleColor="@null" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="16dp"
+                android:background="?colorOutlineVariant"
+                app:layout_constraintBottom_toBottomOf="@id/sw_enable"
+                app:layout_constraintEnd_toStartOf="@id/sw_enable"
+                app:layout_constraintTop_toTopOf="@id/sw_enable" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/sw_enable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:checked="@{sender.smsGatewayEnabled || sender.inAppGatewayEnabled || sender.emailGatewayEnabled}"
+                android:onCheckedChanged="@{(btn, isChecked) -> viewModel.onSenderCheckedChanged(sender, isChecked)}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</layout>

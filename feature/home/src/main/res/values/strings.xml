@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">SMS Router</string>
+
+    <!-- Common words -->
+    <eat-comment />
+    <string name="undo">Undo</string>
+
+    <!-- Chips -->
+    <eat-comment />
+    <string name="chip_sms_text">SMS</string>
+    <string name="chip_in_app_text">In-App</string>
+    <string name="chip_email_text">Email</string>
+
+    <!-- App bar -->
+    <eat-comment />
+    <string name="app_bar_search_hint">Search in senders</string>
+    <string name="app_bar_item_speak_title">Speak to search</string>
+
+    <!-- Dialogs -->
+    <eat-comment />
+    <string name="dialog_delete_history_title">Delete search?</string>
+    <string name="dialog_btn_delete_text">Delete</string>
+
+    <!-- Content descriptions -->
+    <eat-comment />
+    <string name="fab_add_sender_cont_desc">Create new SMS sender</string>
+
+    <!-- String formats -->
+    <eat-comment />
+    <string name="format_removed_sender">Removed %s.</string>
+    <string name="format_dialog_delete_history_msg">\"%s\" will be deleted from your search history</string>
+</resources>

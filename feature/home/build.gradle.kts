@@ -3,10 +3,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
-    namespace = "com.github.emresarincioglu.smsrouter.core.designsystem"
+    namespace = "com.github.emresarincioglu.smsrouter.feature.home"
     compileSdk = 34
 
     defaultConfig {
@@ -24,29 +25,36 @@ android {
             )
         }
     }
-
     buildFeatures {
         dataBinding = true
     }
-
+    kotlinOptions {
+        jvmTarget = "17"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 }
 
 dependencies {
 
-    api(libs.material)
+    implementation(libs.androidx.appcompat)
 
-    // Glide
-    implementation(libs.glide)
-    kapt(libs.glide.compiler)
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // Navigation
+    implementation(libs.bundles.navigation)
+
+    // Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.bundles.android.test)
+
+    // Modules
+    implementation(project(":core:utility"))
+    implementation(project(":core:designsystem"))
 }

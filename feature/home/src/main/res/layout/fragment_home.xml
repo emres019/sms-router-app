@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".HomeFragment">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.github.emresarincioglu.smsrouter.feature.home.HomeViewModel" />
+    </data>
+
+    <!-- TODO: Add "senders" text -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/cl_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
+
+            <com.google.android.material.search.SearchBar
+                android:id="@+id/search_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/app_bar_search_hint"
+                app:menu="@menu/menu_app_bar" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_sender"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:itemCount="7"
+            tools:listitem="@layout/rv_sender_item" />
+
+        <com.google.android.material.search.SearchView
+            android:id="@+id/sv_sender"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="@string/app_bar_search_hint"
+            android:imeOptions="actionSearch"
+            app:layout_anchor="@id/search_bar">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_search"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="0" />
+        </com.google.android.material.search.SearchView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_add_sender"
+            style="?attr/floatingActionButtonLargeStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/fab_add_sender_cont_desc"
+            app:srcCompat="@drawable/ic_add_24" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

@@ -55,6 +55,5 @@ dependencies {
     androidTestImplementation(libs.bundles.android.test)
 
     // Modules
-    implementation(project(":core:utility"))
     implementation(project(":core:designsystem"))
 }

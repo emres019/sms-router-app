@@ -3,11 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_main"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/nav_graph_home">
 
-    <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.github.emresarincioglu.smsrouter.feature.home.HomeFragment"
-        android:label="@string/screen_home_title"
-        tools:layout="@layout/fragment_home" />
+    <include app:graph="@navigation/nav_graph_home" />
 </navigation>

@@ -3,7 +3,7 @@ package com.github.emresarincioglu.smsrouter.feature.home.model
 import android.net.Uri
 
 /**
- * @param address Sms originating address.
+ * @param address Sms originating address
  */
 data class Sender(
     val id: Int = 0,

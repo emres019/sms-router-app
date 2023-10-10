@@ -33,7 +33,8 @@ import com.github.emresarincioglu.smsrouter.core.designsystem.R as designSystemR
 
 class HomeFragment : Fragment() {
 
-    private lateinit var binding: FragmentHomeBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
     private val homeViewModel: HomeViewModel by viewModels()
 
     private val speechRecognizerLauncher =
@@ -54,7 +55,7 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
 
-        binding = FragmentHomeBinding.inflate(inflater, container, false).apply {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false).apply {
             viewModel = homeViewModel
             lifecycleOwner = viewLifecycleOwner
         }
@@ -63,6 +64,11 @@ class HomeFragment : Fragment() {
         observeUiState()
 
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun observeUiState() {

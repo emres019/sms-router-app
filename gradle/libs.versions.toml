@@ -6,11 +6,9 @@ androidJunit = "1.1.5"
 junit = "4.13.2"
 constraintlayout = "2.1.4"
 material = "1.9.0"
-navigationUi = "2.7.4"
-navigationFragment = "2.7.4"
-androidGradle = "8.1.2"
-androidLibrary = "8.1.2"
-kotlin = "1.8.20"
+navigation = "2.7.4"
+gradle = "8.1.2"
+kotlin = "1.9.0"
 hilt = "2.48.1"
 room = "2.5.2"
 glide = "4.15.1"
@@ -22,8 +20,8 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidJunit" }
-androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationUi" }
-androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragment" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-room = { module = "androidx.room:room-ktx", version.ref = "room" }
@@ -41,8 +39,9 @@ room = ["androidx-room", "androidx-room-runtime"]
 android-test = ["junit", "androidx-junit", "androidx-espresso-core"]
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "androidGradle" }
-android-library = { id = "com.android.library", version.ref = "androidLibrary" }
+android-application = { id = "com.android.application", version.ref = "gradle" }
+android-library = { id = "com.android.library", version.ref = "gradle" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+navigation-safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }

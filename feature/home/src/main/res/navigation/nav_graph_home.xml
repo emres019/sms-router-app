@@ -9,5 +9,15 @@
         android:id="@+id/homeFragment"
         android:name="com.github.emresarincioglu.smsrouter.feature.home.HomeFragment"
         android:label="@string/screen_home_title"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_homeFragment_to_createSenderFragment"
+            app:destination="@id/createSenderDialogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createSenderDialogFragment"
+        android:name="com.github.emresarincioglu.smsrouter.feature.home.CreateSenderDialogFragment"
+        tools:layout="@layout/fragment_create_sender" />
 </navigation>

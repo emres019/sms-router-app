@@ -16,20 +16,20 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.transition.TransitionManager
+import com.github.emresarincioglu.smsrouter.core.designsystem.setBottomNavBarVisibility
 import com.github.emresarincioglu.smsrouter.feature.home.databinding.FragmentHomeBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.search.SearchView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialFade
+import com.google.android.material.transition.MaterialElevationScale
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Locale
 import com.github.emresarincioglu.smsrouter.core.designsystem.R as designSystemR
-
 
 class HomeFragment : Fragment() {
 
@@ -50,6 +50,13 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        exitTransition = MaterialElevationScale(/* growing= */ false)
+        reenterTransition = MaterialElevationScale(/* growing= */ true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -134,8 +141,15 @@ class HomeFragment : Fragment() {
         setupAppBar()
         setupSenderRecyclerView()
         setupSenderSearchView()
+
+        setBottomNavBarVisibility(View.VISIBLE)
         binding.fabAddSender.setOnClickListener {
-            // TODO: Navigate to create sender full screen dialog
+
+            setBottomNavBarVisibility(View.INVISIBLE, transition = null)
+            findNavController().navigate(
+                HomeFragmentDirections.actionHomeFragmentToCreateSenderFragment(),
+                FragmentNavigatorExtras(binding.fabAddSender to "fab_to_dialog")
+            )
         }
     }
 
@@ -186,11 +200,11 @@ class HomeFragment : Fragment() {
 
             if (newState == SearchView.TransitionState.SHOWING) {
 
-                setBottomNavBarVisibility(isVisible = false)
+                setBottomNavBarVisibility(View.GONE)
                 binding.fabAddSender.hide()
             } else if (newState == SearchView.TransitionState.HIDDEN) {
 
-                setBottomNavBarVisibility(isVisible = true)
+                setBottomNavBarVisibility(View.VISIBLE)
                 binding.searchBar.text = binding.svSender.text
                 binding.fabAddSender.show()
 
@@ -212,25 +226,5 @@ class HomeFragment : Fragment() {
             binding.svSender.hide()
             true
         }
-    }
-
-    private fun setBottomNavBarVisibility(isVisible: Boolean, animate: Boolean = true) {
-
-        val bottomNavBar: BottomNavigationView =
-            requireActivity().findViewById(designSystemR.id.bottom_nav_bar)
-        val newVisibility = if (isVisible) View.VISIBLE else View.GONE
-
-        if (newVisibility == bottomNavBar.visibility) {
-            return
-        }
-
-        if (animate) {
-            val transitionAnimation = MaterialFade()
-            val activityRootView =
-                requireActivity().findViewById<ViewGroup>(android.R.id.content)
-            TransitionManager.beginDelayedTransition(activityRootView, transitionAnimation)
-        }
-
-        bottomNavBar.visibility = newVisibility
     }
 }
